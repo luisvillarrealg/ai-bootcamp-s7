@@ -8,7 +8,15 @@
 
 ## Service Context
 
-<!-- Copilot: summarize what the todo-service is and how it will be hosted (from docs/project-overview.md) -->
+The **todo-service** is a small full-stack task manager used as the baseline service for the golden-path lab. It is a typical internal CRUD service:
+
+- **Frontend:** React 18 SPA (`packages/frontend`), served by nginx on port 80 in the container.
+- **Backend:** Node.js 20 + Express 4 API (`packages/backend`) on port 4000, exposing `GET/POST/PUT/DELETE /api/todos` and `GET /health` (used by the ALB target group health check).
+- **Storage:** in-memory (stateless, no database) — intentional for the lab.
+
+**Hosting:** both containers are built as Docker images, pushed to two ECR repositories, and run together in a single **AWS ECS Fargate** task (256 CPU / 512 MiB, 1 replica in dev) behind a public **Application Load Balancer** on HTTP port 80. Access to the ALB is restricted to the developer's own public IP (`/32`). Logs go to CloudWatch log groups (7-day retention in dev) and Container Insights is enabled on the cluster. Because this is a fresh account, the module also creates the VPC, subnets and NAT gateway (`create_networking = true`).
+
+The service code is not changed in this lab; the work is the platform layer around it (IaC in Step 1, CI/CD in Steps 2–3).
 
 ---
 

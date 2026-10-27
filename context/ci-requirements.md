@@ -8,7 +8,13 @@
 
 ## Service Context
 
-<!-- Copilot: summarize the tech stack (Node.js version, test framework, IaC tool) that CI must validate (from docs/project-overview.md) -->
+CI must validate a small full-stack service managed as an npm workspaces monorepo:
+
+- **Runtime:** Node.js 20 (backend: Express 4 on port 4000; frontend: React 18 SPA served by nginx).
+- **Lint:** ESLint in `packages/backend` and `packages/frontend`.
+- **Tests:** Jest (backend, in-memory CRUD API) with a coverage gate of 80%.
+- **IaC:** Terraform >= 1.5 with AWS provider ~> 5.0; the dev stack in `infra/stacks/dev` calls the golden-path ECS Fargate module, scanned with checkov.
+- **Containers:** Docker images for backend and frontend, built on every PR and pushed to ECR from `main`.
 
 ## Reusable Workflow (`golden-path-ci.yml`)
 
@@ -35,7 +41,7 @@
 **Standards:**
 
 - `permissions: contents: read, pull-requests: write` at workflow level
-- Pin all actions to SHA (use v4 equivalents)
+- Pin all actions to a version tag (e.g. `actions/checkout@v4`); never commit SHAs
 - Add `$GITHUB_STEP_SUMMARY` output for test coverage and plan results
 - **REQUIRED**: Do NOT set `cache: 'npm'` on `actions/setup-node` — this repo has no lock files and the job will fail with a "lock file not found" error.
 
